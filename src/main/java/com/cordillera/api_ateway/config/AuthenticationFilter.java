@@ -23,33 +23,31 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
-
+        System.out.println("GATEWAY DEBUG - Petición recibida en: " + path);
 
         if (!routerValidator.isSecured(path)) {
+            System.out.println("GATEWAY DEBUG - Ruta pública, pasando...");
             return chain.filter(exchange);
         }
 
-        
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("GATEWAY DEBUG - Error: Header Authorization ausente o inválido.");
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
         String token = authHeader.substring(7);
-        try {
-            if (!jwtUtil.validateToken(token)) {
-                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-                return exchange.getResponse().setComplete();
-            }
-        } catch (Exception e) {
-            
+        if (!jwtUtil.validateToken(token)) {
+            System.out.println("GATEWAY DEBUG - Error: Token inválido según JwtUtil.");
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
-        
-        return chain.filter(exchange);
+        System.out.println("GATEWAY DEBUG - Token válido, reenviando a microservicio...");
+        return chain.filter(exchange.mutate()
+                .request(r -> r.header(HttpHeaders.AUTHORIZATION, authHeader))
+                .build());
     }
 
     @Override
@@ -57,4 +55,3 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         return -1;
     }
 }
-
