@@ -46,8 +46,10 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
         System.out.println("GATEWAY DEBUG - Token válido, reenviando a microservicio...");
         return chain.filter(exchange.mutate()
-                .request(r -> r.header(HttpHeaders.AUTHORIZATION, authHeader))
-                .build());
+            .request(exchange.getRequest().mutate()
+             .header(HttpHeaders.AUTHORIZATION, authHeader)
+             .build())
+            .build());
     }
 
     @Override
