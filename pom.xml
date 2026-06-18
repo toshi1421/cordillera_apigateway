@@ -15,12 +15,15 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>api-gateway</name>
 
-    <properties>
+   <properties>
         <java.version>17</java.version>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
         <sonar.projectKey>api-gateway</sonar.projectKey>
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        
         <sonar.coverage.exclusions>
-            **/config/**,
             **/security/**,
             **/*Application.java
         </sonar.coverage.exclusions>
@@ -109,6 +112,9 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+						<configuration>
+							<format>XML</format>
+						</configuration>
                     </execution>
                 </executions>
             </plugin>
